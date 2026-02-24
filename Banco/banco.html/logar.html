@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Banco Bancário</title>
+    <link rel="icon" href="../img/mobile-banking (1).png" type="image/png">
+    <link rel="stylesheet" href="../banco.css/styles.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-back"><a href="inicio.html" class="back-button">← Voltar</a></div>
+            <h1 class="header-title">Acessar Conta</h1>
+            <p class="header-subtitle">Entre com seu e-mail cadastrado</p>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="form-container">
+                <div class="form-card">
+                    <div id="loginError" style="color: red; margin-bottom: 15px; display: none;"></div>
+                    
+                    <form id="loginForm" class="form">
+                        <div class="form-group">
+                            <label for="email" class="form-label">Seu Email</label>
+                            <input id="email" type="email" placeholder="seu@email.com" class="form-input" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-full">Entrar na Conta</button>
+                    </form>
+                    
+                    <p style="margin-top: 20px; text-align: center;">
+                        Ainda não tem conta? <a href="user.html">Criar conta agora</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- IMPORTANTE: Importe apenas o user.js para evitar erros de console -->
+    <script src="../banco.js/user.js"></script>
+
+    <script>
+        // No arquivo banco.html/logar.html
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault(); // Impede o recarregamento da página
+
+    const emailInput = document.getElementById('email').value.trim();
+    const errorDiv = document.getElementById('loginError');
+
+    // 1. Prepara os dados para enviar ao PHP (Método POST)
+    const formData = new FormData();
+    formData.append('email', emailInput);
+
+    try {
+        // 2. Faz a chamada para o login.php (Verifique se o caminho está correto!)
+        const response = await fetch('../banco.php/login.php', {
+            method: 'POST',
+            body: formData
+        });
+
+        // Converte a resposta para objeto JSON
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            // 3. Sucesso: Salva o email na sessão e redireciona para a index
+            sessionStorage.setItem('currentUserEmail', data.email);
+            window.location.href = 'index.html'; 
+        } else {
+            // 4. Erro: Usuário não encontrado no banco
+            errorDiv.textContent = data.message;
+            errorDiv.style.display = 'block';
+        }
+    } catch (error) {
+        // Caso o servidor caia ou o caminho esteja errado
+        console.error("Erro no login:", error);
+        errorDiv.textContent = "Erro ao conectar com o servidor.";
+        errorDiv.style.display = 'block';
+    }
+});
+
+    </script>
+</body>
+</html>
